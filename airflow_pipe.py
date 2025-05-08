@@ -110,7 +110,7 @@ def train_model():
 
 dag_car_price = DAG(
     dag_id="car_price_prediction",
-    start_date=datetime(2025, 2, 3),
+    start_date=datetime(2025, 5, 8),
     schedule_interval=timedelta(hours=6),
     max_active_runs=1,
     catchup=False,
