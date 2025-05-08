@@ -138,5 +138,4 @@ train_task = PythonOperator(
     dag=dag_car_price
 )
 
-# Определение порядка выполнения задач
 download_task >> clean_task >> train_task
