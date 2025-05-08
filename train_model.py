@@ -93,11 +93,5 @@ def train():
         signature = infer_signature(X_train, best_model.predict(X_train))
         mlflow.sklearn.log_model(best_model, "model", signature=signature)
 
-        joblib.dump(best_model, "best_car_price_model.pkl")
-        
-        print(f"Best model RMSE: {rmse:.2f}")
-        print(f"Best model R2: {r2:.2f}")
-        print(f"Best parameters: {clf.best_params_}")
-
-if __name__ == "__main__":
-    train()
+        with open("best_car_price_model", "wb") as file:
+            joblib.dump(lg, file)
