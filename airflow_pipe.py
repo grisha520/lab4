@@ -21,27 +21,22 @@ def download_data():
 
 def clean_data():
     df = pd.read_csv("car_price.csv")
-    
-    # Удаление ненужных колонок
+
     df = df.drop(columns=['car_ID', 'CarName'], errors='ignore')
-    
-    # Обработка категориальных признаков
+
     categorical_cols = ['fueltype', 'aspiration', 'doornumber', 'carbody', 
                        'drivewheel', 'enginelocation', 'enginetype', 
                        'cylindernumber', 'fuelsystem']
-    
-    # Обработка числовых признаков
+
     numeric_cols = ['wheelbase', 'carlength', 'carwidth', 'carheight', 
                    'curbweight', 'enginesize', 'boreratio', 'stroke', 
                    'compressionratio', 'horsepower', 'peakrpm', 'citympg', 
                    'highwaympg']
-    
-    # Очистка выбросов
-    df = df[df['price'] < 40000]  # Удаляем очень дорогие автомобили
-    df = df[df['price'] > 1000]   # Удаляем очень дешевые автомобили
-    df = df[df['horsepower'] < 250]  # Удаляем автомобили с очень высокой мощностью
-    
-    # Заполнение пропущенных значений (если есть)
+
+    df = df[df['price'] < 40000]
+    df = df[df['price'] > 1000]  
+    df = df[df['horsepower'] < 250] 
+
     for col in numeric_cols:
         if df[col].isnull().sum() > 0:
             median = df[col].median()
@@ -51,23 +46,19 @@ def clean_data():
         if df[col].isnull().sum() > 0:
             mode = df[col].mode()[0]
             df[col] = df[col].fillna(mode)
-    
-    # Сохранение очищенных данных
+
     df.to_csv('car_price_clean.csv', index=False)
     print(f"Cleaned dataset shape: {df.shape}")
     return True
 
 def train_model():
     df = pd.read_csv('car_price_clean.csv')
-    
-    # Определение признаков и целевой переменной
+
     X = df.drop('price', axis=1)
     y = df['price']
-    
-    # Разделение данных
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    
-    # Определение типов признаков
+
     categorical_cols = ['fueltype', 'aspiration', 'doornumber', 'carbody', 
                        'drivewheel', 'enginelocation', 'enginetype', 
                        'cylindernumber', 'fuelsystem']
@@ -75,8 +66,7 @@ def train_model():
                    'curbweight', 'enginesize', 'boreratio', 'stroke', 
                    'compressionratio', 'horsepower', 'peakrpm', 'citympg', 
                    'highwaympg']
-    
-    # Создание pipeline для предобработки
+
     numeric_transformer = Pipeline(steps=[
         ('imputer', SimpleImputer(strategy='median')),
         ('scaler', StandardScaler())
@@ -92,8 +82,7 @@ def train_model():
             ('num', numeric_transformer, numeric_cols),
             ('cat', categorical_transformer, categorical_cols)
         ])
-    
-    # Создание полного pipeline с разными моделями
+
     models = {
         'sgd': Pipeline(steps=[
             ('preprocessor', preprocessor),
@@ -104,8 +93,7 @@ def train_model():
             ('regressor', RandomForestRegressor(n_estimators=100, random_state=42))
         ])
     }
-    
-    # Обучение и оценка моделей
+
     results = {}
     for name, model in models.items():
         print(f"\nTraining {name} model...")
@@ -120,7 +108,6 @@ def train_model():
     
     return results
 
-# Определение DAG
 dag_car_price = DAG(
     dag_id="car_price_prediction",
     start_date=datetime(2025, 2, 3),
@@ -133,7 +120,6 @@ dag_car_price = DAG(
     }
 )
 
-# Определение задач
 download_task = PythonOperator(
     task_id="download_car_data",
     python_callable=download_data,
